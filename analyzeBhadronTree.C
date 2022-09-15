@@ -18,9 +18,11 @@ void analyzeBhadronTree()
   TFile *inFile = TFile::Open(inFileName);                       //"Open" is an object and the "TFile" class function
 
     //Histograms
-  TH1F* zH  = new TH1F("zH",  ";z;",            200,   0., 2.);            
-  TH1F* jtH  = new TH1F("jtH",  ";jt;",              200,   0., 10.);
-  TH1F* rH  = new TH1F("rH",  "; R;",              200,   0., 10.);
+  TH1F* zH  = new TH1F("zH",  ";z;",            40,   0., 1.5 );           
+  TH1F* jtH  = new TH1F("jtH",  ";jt;",              40,   0., 8.);
+  
+  TH1F* rH  = new TH1F("rH",  "; R;",              40,   0., 2.);
+  TH1F* r_missing_partH  = new TH1F("r_missing_partH",  "; R;",              40,   0., 2.);
 	//TH1F* pzH  = new TH1F("pzH",  "pz",              100,   0., 5.); 
 	//TH1F* eH  = new TH1F("eH",  "e",              100,   0., 50.);
 
@@ -106,8 +108,8 @@ void analyzeBhadronTree()
       double Mu2r = sqrt( pow( j4vec.Eta() - Mu24vec.Eta() , 2) + pow( j4vec.Phi() - Mu24vec.Phi() , 2) );
 
       
-      rH ->Fill(br);
-
+      //rH ->Fill(br);
+      
       bool Kinjet = Kaonr <= 0.5;
       bool Mu1injet = Mu1r <= 0.5;
       bool Mu2injet = Mu2r <= 0.5;
@@ -116,10 +118,15 @@ void analyzeBhadronTree()
       if (br <= 0.5 && Kaonr <= 0.5 && Mu1r <= 0.5 && Mu2r <= 0.5)  // Should we check  b isninside the jet again after adding particle in there?
       { 
         z = ( j3vec * b3vec ) / ( j3vec.Mag2() );
+        //
+        //z = ( j3vec.Unit() * b3vec.Unit() ) / ( j3vec.Unit().Mag2() );
+        
 	    Jt = (j3vec.Cross(b3vec).Mag())/(j3vec.Mag());
+        //Jt = (j3vec.Unit().Cross(b3vec.Unit()).Mag())/(j3vec.Unit().Mag());
         
         zH->Fill(z);
         jtH->Fill(Jt); 
+        rH ->Fill(br);
       }
       else
       {  
@@ -129,9 +136,12 @@ void analyzeBhadronTree()
           j3vec = j4vec.Vect();
           z = ( j3vec * b3vec ) / ( j3vec.Mag2() );
 	      Jt = (j3vec.Cross(b3vec).Mag())/(j3vec.Mag());
+		  br = sqrt( pow( j4vec.Eta() - b4vec.Eta() , 2) + pow( j4vec.Phi() - b4vec.Phi() , 2) );
+          
         
           zH->Fill(z);
           jtH->Fill(Jt);
+          r_missing_partH ->Fill(br);
 
         }
 		
@@ -142,9 +152,11 @@ void analyzeBhadronTree()
           j3vec = j4vec.Vect();
           z = ( j3vec * b3vec ) / ( j3vec.Mag2() );
 	      Jt = (j3vec.Cross(b3vec).Mag())/(j3vec.Mag());
+		  br = sqrt( pow( j4vec.Eta() - b4vec.Eta() , 2) + pow( j4vec.Phi() - b4vec.Phi() , 2) );
         
           zH->Fill(z);
           jtH->Fill(Jt);
+          r_missing_partH ->Fill(br);
 
 		   
         }
@@ -155,27 +167,46 @@ void analyzeBhadronTree()
           j3vec = j4vec.Vect();
           z = ( j3vec * b3vec ) / ( j3vec.Mag2() );
 	      Jt = (j3vec.Cross(b3vec).Mag())/(j3vec.Mag());
+		  br = sqrt( pow( j4vec.Eta() - b4vec.Eta() , 2) + pow( j4vec.Phi() - b4vec.Phi() , 2) );
         
           zH->Fill(z);
           jtH->Fill(Jt);
+          r_missing_partH ->Fill(br);
         }
         
-        else 
+        /*else 
         { 
          cout<< "Problem encountered" << endl;
-        }
+        }*/
 	  } 
      
     } 
         
   }
-	
+	/*zH->Sumw2();
+    TH1F* zHnorm = (TH1F*)(zH->Clone("zHnorm"));
+    zHnorm->Scale(1./zH->Integral());
+    
+    jtH->Sumw2();   //maybe use logs here
+    TH1F* jtHnorm = (TH1F*)(jtH->Clone("jtHnorm"));
+    jtHnorm->Scale(1./jtH->Integral());*/
+
+	zH->Sumw2();
+    TH1F* zHnorm = (TH1F*)(zH->Clone("zHnorm"));
+    zHnorm->Scale(1./zH->GetEntries());
+    
+    jtH->Sumw2();   //maybe use logs here
+    TH1F* jtHnorm = (TH1F*)(jtH->Clone("jtHnorm"));
+    jtHnorm->Scale(1./jtH->GetEntries());
 
 	auto c=new TCanvas("Canvas","Canvas",800,800);
-	c->Divide(1,3);
-	c->cd(1); zH->Draw();
-	c->cd(2); jtH->Draw();
+	c->Divide(2,2);
+    //c->cd(1); zH->Draw();
+	c->cd(1); zHnorm->Draw();
+    //c->cd(2); jtH->Draw();
+	c->cd(2); jtHnorm->Draw();
 	c->cd(3); rH->Draw();
+    c->cd(4); r_missing_partH->Draw();
 
 
  
