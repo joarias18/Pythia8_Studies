@@ -1,2 +1,2 @@
-# QCD_bbbarquarkFragHadroniz
-This is a repository to investigate b quark fragmentation and hadronization properties at the LHCb with CM = 13 TeV
+# Hard QCD - Hadronization of B(+/-) Mesons 
+This is a repository with basic usuage of Pythia8 to explore the hadronization of b quarks under LHCb geometry and kinemtics 
